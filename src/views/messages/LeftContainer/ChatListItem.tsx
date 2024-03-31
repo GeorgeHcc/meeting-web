@@ -2,12 +2,11 @@ import React, { useEffect, useState } from "react";
 import { Avatar, Dropdown, theme, Badge } from "antd";
 import type { MenuProps } from "antd";
 import useMessageStore from "@/store/modules/messageStore";
-// import useSocket from "@/hooks/useSocket";
-// import getUserInfo from "@/utils/getUserInfo";
+import { IGroup } from "../types";
 import formatTime from "@/utils/format";
 // const { useToken } = theme;
 
-export interface ChatListItemData {
+export type ChatListItemData = {
   friendID: string;
   userStatus?: string;
   avatarImage?: string;
@@ -17,11 +16,11 @@ export interface ChatListItemData {
   lastMsg?: string;
   lastTime: string;
   lastChatRecords?: [];
-}
+} & IGroup & { type?: "friend" | "group" };
 export interface ChatListProps {
   data: ChatListItemData;
   onSelected: (selectedVal: ChatListItemData) => void;
-  currentSelect: string|null;
+  currentSelect: string | null;
 }
 
 const items: MenuProps["items"] = [
@@ -44,28 +43,18 @@ const items: MenuProps["items"] = [
 ];
 
 const ChatListItem: React.FC<ChatListProps> = ({ data, onSelected, currentSelect }) => {
-  // const { token } = useToken();
-  console.log("data:", data);
-  // const io = useSocket();
-  // const [selectItem, setSelectedItem] = useState<string | number | null>(null); //当前选中的好友
   const [unRead, setUnRead] = useState(0);
-
-  const currentMsg = useMessageStore((state) => state.messages);
+  const messageBucket = useMessageStore((state) => state.messages);
+  const incrementMsgCnt=useMessageStore(state=>state.increment)
   const consumeMessage = useMessageStore((state) => state.consumeMessage);
-
-  // const [msg,setMsg]=useState(()=>currentMsg.get(data.friendID))
-  // useEffect(() => {
-  //   const currentChatData = JSON.parse(sessionStorage.getItem("current-chat-data")!);
-  //   setSelectedItem(currentChatData?.friendID);
-  // }, []);
-
-
+  const decrementMsgCnt = useMessageStore((state) => state.decrement);
 
   useEffect(() => {
-    if (currentMsg.has(data.friendID)) {
-      setUnRead(currentMsg.get(data.friendID)!.length);
+    if (messageBucket.has(data.friendID)) {
+      setUnRead(messageBucket.get(data.friendID)!.length);
     }
-  }, [currentMsg, data.friendID]);
+   
+  }, [messageBucket, data.friendID]);
 
   //右键菜单选中事件
   const handleDropDownClick: MenuProps["onClick"] = ({ key }) => {
@@ -75,17 +64,13 @@ const ChatListItem: React.FC<ChatListProps> = ({ data, onSelected, currentSelect
       case "2":
         break;
       case "3":
+        incrementMsgCnt()
         setUnRead(1);
         break;
       case "4":
         break;
     }
   };
-
-
-
-
-
 
   return (
     <Dropdown
@@ -98,6 +83,7 @@ const ChatListItem: React.FC<ChatListProps> = ({ data, onSelected, currentSelect
         key={data.friendID}
         onClick={() => {
           consumeMessage(data.friendID);
+          decrementMsgCnt(1)
           // setSelectedItem(data.friendID);
           onSelected(data);
           setUnRead(0);
@@ -115,7 +101,7 @@ const ChatListItem: React.FC<ChatListProps> = ({ data, onSelected, currentSelect
           </Badge>
 
           <span className="chat-info">
-            <p className="chat-title">{data.remark||data.nick_name}</p>
+            <p className="chat-title">{data.remark || data.nick_name}</p>
             <p className="chat-last-msg">{data.lastMsg}</p>
           </span>
         </div>

@@ -35,28 +35,21 @@ import { getMsgListByUser } from "@/service/api";
 import axios from "axios";
 import getUserInfo from "@/utils/getUserInfo";
 import { produce } from "immer";
+import { getCurrentChatData } from "@/utils/getCurrentChatData";
+import { IMessage, IUserInfo } from "../types";
+import useMessageStore from "@/store/modules/messageStore";
 const { useToken } = theme;
 
-export type MsgType = {
-  isMe: boolean;
-  data: string;
-  time?: string;
-  avatarImage?: string;
-  nick_name?: string;
-  group_nick_name?: string;
-};
+export type MsgType = Partial<IUserInfo> & Partial<IMessage> & { isMe: boolean };
 
-export type ReceivedMsg = MsgType & { from: string; to?: string };
+export type ReceivedMsg = MsgType & { from: string; to?: string; msg?: string };
 
 type RightContainerProps = {
   data?: ChatListItemData | null;
 };
+
 const RightContainer: React.FC<RightContainerProps> = (props) => {
   const { token } = useToken();
-  const io = useSocket();
-
-  //---------------------------自定义Drwer样式-------------------------------
-
   const drawerStyles: DrawerStyles = {
     mask: {
       backdropFilter: "blur(10px)",
@@ -74,23 +67,21 @@ const RightContainer: React.FC<RightContainerProps> = (props) => {
     },
   };
 
-  //--------------------------------------------------------------------------
-  const [chatMessages, setChatMessages] = useState<MsgType[]>(() => [{ data: "", isMe: false }]);
-
+  const [chatMessages, setChatMessages] = useState<MsgType[]>(() => [{ msg: "", isMe: false }]);
   const contentRef = useRef<HTMLDivElement | null>(null);
 
+  //获取当前好友列表选中的好友消息记录
   useEffect(() => {
     const fetchData = async () => {
       const userId = getUserInfo(["id"]);
       try {
         const res = await axios.post(getMsgListByUser, { from: userId, to: props.data!.friendID });
         const list = res.data.msgList.map((item: any) => {
-          const msg = { data: item.msg, time: item.time };
+          const msg = { msg: item.msg, time: item.time };
           return item.from === userId ? { ...msg, isMe: true } : { ...msg, isMe: false };
         });
         setChatMessages([...list]);
       } catch (error) {
-        // 错误处理
         console.log("Error fetching chat messages:", error);
       }
     };
@@ -100,22 +91,23 @@ const RightContainer: React.FC<RightContainerProps> = (props) => {
     }
   }, [props.data]);
 
+  //自动滚动到消息底部（最新消息）
   useEffect(() => {
     if (contentRef.current) contentRef.current.scrollTop = 9999;
   }, [props.data?.friendID, chatMessages]);
 
+  const currentChatingMsg = useMessageStore((state) => state.currentChatingMsg);
+  const setCurrentChatingMsg = useMessageStore((state) => state.setCurrentChatingMsg);
   useEffect(() => {
-    console.log("RightContainer已经Mounted");
-
-    io.on("receive-msg", (msg: ReceivedMsg) => {
-      setChatMessages(
-        // [...chatMessages, msg]
-        produce(chatMessages, (draft) => {
-          draft.push(msg);
-        })
-      );
+    // console.log("currentChatingMsg:", currentChatingMsg);
+    const newMsg = produce(chatMessages, (draft) => {
+      draft.push({ ...currentChatingMsg, isMe: false });
     });
-  }, [chatMessages, io]);
+    setChatMessages(newMsg);
+    () => {
+      setCurrentChatingMsg({});
+    };
+  }, [currentChatingMsg]);
 
   function pushMsg(msg: MsgType) {
     setChatMessages([...chatMessages, msg]);
@@ -137,6 +129,8 @@ const RightContainer: React.FC<RightContainerProps> = (props) => {
     console.log(e);
     message.error("Click on No");
   };
+
+  //===============================render=========================================
   return (
     <>
       <Container token={token}>
@@ -189,7 +183,7 @@ const RightContainer: React.FC<RightContainerProps> = (props) => {
                         item.isMe ? getUserInfo(["avatarImage"]) : props.data?.avatarImage
                       }
                       nick_name={item.isMe ? getUserInfo(["nick_name"]) : props.data?.nick_name}
-                      data={item.data}
+                      msg={item.msg}
                     ></ChatRecord>
                   );
                 })}

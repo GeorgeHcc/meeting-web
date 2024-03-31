@@ -18,6 +18,7 @@
     "@mediapipe/selfie_segmentation": "^0.1.1675465747",
     "@reduxjs/toolkit": "^2.1.0",
     "@types/node": "^20.11.10",
+    "ahooks": "^3.7.10",
     "antd": "5.13.2",
     "axios": "^1.6.7",
     "classnames": "^2.5.1",

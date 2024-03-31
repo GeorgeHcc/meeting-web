@@ -21,6 +21,7 @@ const V_Menu: React.FC = () => {
   useEffect(() => {
     setSelectedKey(location.pathname); // 当 URL 变化时更新选中键
   }, [location]);
+  
   useEffect(() => {
     setUnReadNum(totalMessage);
   }, [totalMessage]);
@@ -74,7 +75,6 @@ const V_Menu: React.FC = () => {
         style={{ height: "100%", backgroundColor: `${purple[6]}` }}
         onSelect={handleSelect}
       >
-        <Menu.Item></Menu.Item>
       </Menu>
     </ConfigProvider>
   );

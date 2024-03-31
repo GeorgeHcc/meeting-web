@@ -5,6 +5,7 @@ import React, { ReactNode } from "react";
 import george from "@/assets/georgeh.jpg";
 
 import V_Menu from "@/components/menu";
+import getUserInfo from "@/utils/getUserInfo";
 const { Sider, Content, Header } = Layout;
 type mainLayoutProps = {
   children: ReactNode;
@@ -22,7 +23,9 @@ export const MainLayout: React.FC<mainLayoutProps> = ({ children, mode = "defaul
       <Layout style={{ height: "100%" }}>
         {/* 菜单栏 */}
         <OutterSider width={60}>
-          <UserAvatar src={george} size={45} />
+          <UserAvatar src={getUserInfo(["avatarImage"])} size={45}>
+            {getUserInfo(["nick_name"])}
+          </UserAvatar>
           <V_Menu />
         </OutterSider>
         <Layout>{children}</Layout>

@@ -1,4 +1,4 @@
-import React, { startTransition, useEffect, useState } from "react";
+import React, { startTransition, useCallback, useEffect, useState } from "react";
 import {
   LockOutlined,
   UserOutlined,
@@ -13,30 +13,36 @@ import { loginApi } from "@/service/api";
 import { NavLink, useNavigate } from "react-router-dom";
 import userStore from "@/store/modules/userStore";
 import axios from "axios";
+// import service from "@/service/server";
+import { useService } from "@/context/serviceContext";
 
 const Login: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const setUserId = userStore((state) => state.setUserId);
   const navigate = useNavigate();
-  useEffect(() => {
-    const account = localStorage.getItem("account-info")
-      ? JSON.parse(localStorage.getItem("account-info")!)
-      : null;
-    if (account) {
-      setUserId(account.id);
-      navigate("/");
-    }
-  });
+  const service = useService();
+  // useEffect(() => {
+  //   const account = localStorage.getItem("account-info")
+  //     ? JSON.parse(localStorage.getItem("account-info")!)
+  //     : null;
+  //   if (account) {
+  //     setUserId(account.id);
+  //     navigate("/");
+  //   }
+  // });
+
   const onFinish = (values: unknown) => {
     console.log(values);
     try {
       setLoading(true);
-      axios
-        .post(loginApi, values)
+      service
+        .post("/login", values)
         .then((res) => {
           if (res.data.status) {
             message.success(`${res.data.msg} Hi,${res.data.user.nick_name}!`);
             localStorage.setItem("account-info", JSON.stringify(res.data.user));
+            localStorage.setItem("refresh-token", JSON.stringify(res.data.refreshToken));
+
             setUserId(res.data.user.id);
             navigate("/");
           } else {
@@ -52,7 +58,6 @@ const Login: React.FC = () => {
         });
       //@ts-ignore
     } catch (e: any) {
-      console.log("error", e);
       message.error(e);
     }
   };

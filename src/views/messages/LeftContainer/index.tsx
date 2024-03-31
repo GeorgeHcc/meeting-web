@@ -28,6 +28,7 @@ import {
   VideoCameraAddOutlined,
   UserAddOutlined,
 } from "@ant-design/icons";
+import service from "@/service/server";
 
 const { TextArea } = Input;
 const { useToken } = theme;
@@ -84,6 +85,7 @@ const LeftContainer: React.FC<LeftContainerProps> = ({ userSelectedChange }) => 
     axios.get(`${getFriendsList}/${userId}`).then((res) => {
       setFirendsList(res.data.friendList);
     });
+    // axios.post(`${import.meta.env.VITE_API_URL}/`);
   }, []);
 
   //ChatListItem选中的回调
@@ -128,8 +130,8 @@ const LeftContainer: React.FC<LeftContainerProps> = ({ userSelectedChange }) => 
 
   const fetchData = (value: any) => {
     console.log("value", value);
-    axios
-      .post(`${import.meta.env.VITE_API_URL}/user/getUser`, {
+    service
+      .post('/user/getUser', {
         ...value,
         userId: getUserInfo(["id"]),
       })
@@ -173,10 +175,6 @@ const LeftContainer: React.FC<LeftContainerProps> = ({ userSelectedChange }) => 
         message.error(`${e}`);
       });
   };
-  const createGroupFinish = (value: any) => {
-    console.log(value);
-    // axios.post()
-  };
 
   const SubModalContent = (
     <Modal open={isSubModalOpen} footer={null} onCancel={closeSubModal}>
@@ -192,7 +190,7 @@ const LeftContainer: React.FC<LeftContainerProps> = ({ userSelectedChange }) => 
           }}
         >
           <Avatar
-            src={george}
+            src={subModalData?.row.avatarImage}
             size={80}
             style={{
               position: "absolute",
@@ -200,7 +198,9 @@ const LeftContainer: React.FC<LeftContainerProps> = ({ userSelectedChange }) => 
               zIndex: 1000,
               border: "2px solid #fff",
             }}
-          ></Avatar>
+          >
+            {subModalData?.row.nick_name}
+          </Avatar>
         </div>
         <Descriptions
           style={{ marginTop: 40 }}
@@ -291,6 +291,20 @@ const LeftContainer: React.FC<LeftContainerProps> = ({ userSelectedChange }) => 
       })),
     [firendsList]
   );
+  const createGroupFinish = (value: any) => {
+    console.log(value);
+    axios
+      .post(`${import.meta.env.VITE_API_URL}/group/createGroup`, {
+        ...value,
+        groupHost: getUserInfo(["id"]),
+      })
+      .then((res) => {
+        if (res.data.status) {
+          message.success(`${res.data.msg}`);
+        }
+      });
+  };
+
   const GroupModalContent = (
     <>
       <Form form={createGroupFrom} layout="horizontal" onFinish={createGroupFinish}>
@@ -390,7 +404,7 @@ const ChatList = styled.ul<{ token: GlobalToken }>`
     padding: 0px 10px;
     display: flex;
     align-items: center;
-    border-radius: 8px;
+    border-radius: 3px;
 
     &:hover {
       background-color: ${(t) => t.token.colorBgTextHover};

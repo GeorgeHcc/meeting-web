@@ -30,7 +30,7 @@ const ChatFooter: React.FC<ChatFooterProps> = (props) => {
   const { token } = useToken();
   function sendMessage(msg: string) {
     if (msg.trim().length > 0) {
-      props.pushMsg({ data: inputingData!, isMe: true });
+      props.pushMsg({ msg: inputingData!, isMe: true });
       setOpenEmoji(false); //关闭Emoji弹框
       setInputingData("");
       io.emit("send-msg", { senderId: getUserInfo(["id"]), targetUserId: props.targetUserId, msg });

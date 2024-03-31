@@ -5,23 +5,24 @@ import { Avatar, GlobalToken, theme } from "antd";
 const { useToken } = theme;
 import { MsgType } from ".";
 
-function splitStringIntoArray(str: string | null | undefined, chunkSize: number) {
-  const array = [];
-  // const reg = /\\n/g;
-  if (str?.length==0||!str) return [];
-  else {
-    for (let i = 0; i < str.length; i += chunkSize) {
-      // Ensure we don't go beyond the string length
-      const end = Math.min(i + chunkSize, str.length);
-      const chunk = str.substring(i, end);
-      array.push(chunk);
-    }
-    return array;
-  }
-}
+// function splitStringIntoArray(str: string | null | undefined, chunkSize: number) {
+//   const array = [];
+//   // const reg = /\\n/g;
+//   if (str?.length==0||!str) return [];
+//   else {
+//     for (let i = 0; i < str.length; i += chunkSize) {
+//       // Ensure we don't go beyond the string length
+//       const end = Math.min(i + chunkSize, str.length);
+//       const chunk = str.substring(i, end);
+//       array.push(chunk);
+//     }
+//     return array;
+//   }
+// }
 export type ChatRecordProps = MsgType;
 const ChatRecord: React.FC<ChatRecordProps> = (props) => {
   const { token } = useToken();
+
   return (
     <RecordItem isme={props.isMe?.toString()} token={token}>
       {/* <ChatUserAvatar src={props.imgUrl} size={40}></ChatUserAvatar> */}
@@ -31,11 +32,13 @@ const ChatRecord: React.FC<ChatRecordProps> = (props) => {
         <ChatUserAvatar size={40}>{props.nick_name}</ChatUserAvatar>
       )}
       <div className="chat-bubble">
-        {splitStringIntoArray(props.data, 60).map((item, key) => (
+        {/* {splitStringIntoArray(props.data, 60).map((item, key) => (
           <p key={key} className="chat-bubble-content">
             {item}
           </p>
-        ))}
+        ))} */}
+        {props.msg}
+       
       </div>
     </RecordItem>
   );

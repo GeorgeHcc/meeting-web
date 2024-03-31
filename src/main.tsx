@@ -6,13 +6,15 @@ import { BrowserRouter } from "react-router-dom";
 import { Provider } from "react-redux";
 import store from "./redux";
 import SocketProvider from "./components/SocketProvider";
-
+import { ServiceProvider } from "./context/serviceContext";
 ReactDOM.createRoot(document.getElementById("root")!).render(
-  <SocketProvider>
-    <BrowserRouter>
+  <BrowserRouter>
+    <SocketProvider>
       <Provider store={store}>
-        <App />
+        <ServiceProvider>
+          <App />
+        </ServiceProvider>
       </Provider>
-    </BrowserRouter>
-  </SocketProvider>
+    </SocketProvider>
+  </BrowserRouter>
 );

@@ -1,29 +1,28 @@
-import React, { useEffect, ReactNode, useState } from "react";
-
-// import type { Socket } from "socket.io-client";
+import React, { useEffect, ReactNode } from "react";
 import { io } from "socket.io-client";
 import getUserInfo from "@/utils/getUserInfo";
 import SocketContext from "@/context/socketContext";
-import { message } from "antd";
 import useMessageStore from "@/store/modules/messageStore";
-// const SocketContext = createContext<Socket | null>(null);
+import { getCurrentChatData } from "@/utils/getCurrentChatData";
+import { useLocation } from "react-router-dom";
 
 const SocketProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const socket = io(import.meta.env.VITE_SOCKET_URL);
-  // const [receivedMsg,setReceivedMsg]=useState()
-  const cacheMessage=useMessageStore(state=>state.cacheMessage)
+  const location = useLocation();
+  const cacheMessage = useMessageStore((state) => state.cacheMessage);
+  const setCurrentChatingMsg = useMessageStore((state) => state.setCurrentChatingMsg);
   useEffect(() => {
-    // socket.emit("connect");
-    socket.emit("online", getUserInfo(["id"]));
-    socket.connect() && console.log("socket 已连接");
-    socket.on("receive-msg", (msgs) => {
-      message.info(`来自${msgs.from}消息:${msgs.msg}`)
-      cacheMessage(msgs);
-    });
-    return () => {
-      socket.disconnect() && console.log("socket 已断开连接");
-    };
-  });
+    if (location.pathname !== "login" && location.pathname !== "register") {
+      socket.emit("online", getUserInfo(["id"]));
+      socket.on("receive-msg", (msgs) => {
+        if (getCurrentChatData()!._id !== msgs.from) {
+          cacheMessage(msgs); //缓存到消息桶
+        } else {
+          setCurrentChatingMsg(msgs); //推送
+        }
+      });
+    }
+  }, []);
   return <SocketContext.Provider value={socket}>{children}</SocketContext.Provider>;
 };
 

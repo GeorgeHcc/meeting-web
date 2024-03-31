@@ -15,16 +15,16 @@ function NewContact() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selected, setSelected] = useState<ApplyMsg | null>();
   const [form] = Form.useForm();
-  useEffect(() => {
-    const fetchData = () => {
-      axios
-        .get(`${import.meta.env.VITE_API_URL}/user/getApplyMsg/${getUserInfo(["id"])}`)
-        .then((res: any) => {
-          setUserApplyList(res.data.applyList);
-          console.log("res.data.applyList:", res.data.applyList);
-        });
-    };
 
+  const fetchData = () => {
+    axios
+      .get(`${import.meta.env.VITE_API_URL}/user/getApplyMsg/${getUserInfo(["id"])}`)
+      .then((res: any) => {
+        setUserApplyList(res.data.applyList);
+        console.log("res.data.applyList:", res.data.applyList);
+      });
+  };
+  useEffect(() => {
     fetchData();
   }, []);
 
@@ -34,7 +34,7 @@ function NewContact() {
   };
   const onFinish = (value: any) => {
     axios
-      .put(`${import.meta.env.VITE_API_URL}/user/applyFriends`, {
+      .post(`${import.meta.env.VITE_API_URL}/user/applyFriends`, {
         userId: getUserInfo(["id"]),
         friendId: selected!.user._id,
         status: true,
@@ -44,6 +44,7 @@ function NewContact() {
         if (res.data.status) {
           setIsModalOpen(false);
           form.resetFields();
+          fetchData();
           message.success(`${res.data.msg}`);
         }
       })

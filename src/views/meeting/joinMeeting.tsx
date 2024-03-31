@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { Input, Modal, theme, Avatar, Button, Flex, Dropdown, ConfigProvider, message } from "antd";
 import type { GlobalToken, ModalProps, MenuProps } from "antd";
 import type { ItemType } from "antd/es/menu/hooks/useItems";
-import { createFromIconfontCN, UpOutlined, DownOutlined } from "@ant-design/icons";
+import { createFromIconfontCN, UpOutlined } from "@ant-design/icons";
 
 import styled from "styled-components";
 import getUserInfo from "@/utils/getUserInfo";
@@ -50,7 +50,7 @@ const JoinMeeting: React.FC<JoinMeetingProps> = (props) => {
   const [video, setVideo] = useState(false);
   const [audioDevice, setAudioDevice] = useState<MenuProps["items"]>([]);
   const [videoDevice, setVideoDevice] = useState<MenuProps["items"]>([]);
-  const videoRef = useRef<HTMLVideoElement | null>();
+  const videoRef = useRef<HTMLVideoElement | null>(null);
   const mediaStreamRef = useRef<MediaStream | null>(null);
   useEffect(() => {
     console.log("Mount");
